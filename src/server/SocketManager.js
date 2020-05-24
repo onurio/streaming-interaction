@@ -6,10 +6,9 @@ let currentNote = 36;
 
 module.exports = (socket) =>{
 
-        console.log('userConnected');
-
     socket.on('vote',(value)=>{
       polling = {...polling,[value]:polling[value]+1};
+      
       io.emit('results',polling);
     })
 
@@ -20,21 +19,19 @@ module.exports = (socket) =>{
         console.log('admin joined');
         
         socket.on('triggerPoll',()=>{
+            polling = {up:0,down:0};
+            io.emit('results',polling);
             io.emit('togglePoll',true);
         })
     
         socket.on('stopPoll',()=>{
+            console.log('stopPoll')
             socket.emit('togglePoll',false);
+            endVote();
         })
     
     });
 
-    socket.on('startVote',()=>{
-        //give people 10 seconds to vote.
-        setTimeout(()=>{
-            endVote();
-        },10000)
-    })
 
     const endVote=()=>{
         // emit vote end to all clients
@@ -44,7 +41,7 @@ module.exports = (socket) =>{
             currentNote--;
         }
         socket.to('admin').emit('note',currentNote)
-
+        io.emit('note',currentNote);
     }
     
     socket.on('disconnect',()=>{

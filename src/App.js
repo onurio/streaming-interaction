@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 import Button from '@material-ui/core/Button';
 
 
-const socketURL = 'http://192.168.1.5:4000';
+const socketURL = '/';
 
 
 
@@ -29,6 +29,11 @@ function App() {
       console.log('connected');
     });
     socket.connect();    
+
+
+    socket.on('results',(results)=>{
+      setResults(results);
+    })
 
     socket.on('togglePoll',(value)=>{
       if(value){
