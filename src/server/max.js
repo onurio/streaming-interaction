@@ -13,8 +13,12 @@ maxApi.addHandler('connect',(url)=>{
         socket.emit('adminJoined');   
     })
 
-    socket.on('note',(value)=>{
-        maxApi.outlet(value);
+    socket.on('finalResults',(value)=>{
+        // maxApi.outlet(value);
+        for (inst in value){
+            maxApi.outlet(inst*12+Number(value[inst])-1);
+        }
+        
     })
     // socket.on('users',(users)=>maxApi.outlet(users));
 });

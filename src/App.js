@@ -1,23 +1,43 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useReducer, useRef, useEffect } from 'react';
 import './App.css';
 import io from 'socket.io-client';
-import Button from '@material-ui/core/Button';
+import Instrument from './components/Instrument';
 
 
-const socketURL = '/';
+const socketURL = 'http://localhost:4000';
+
+
+const instruments = ['zabumba','agogo','pandeiro','triangulo','ganza']
+
+let resultsInitial = {}
+instruments.forEach(inst=>resultsInitial[inst] = 1)
+
+
+const initialState = {isPolling: false,voted:{},results:{...resultsInitial}};
+
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'togglePoll':
+      return {...state,voted:{},isPolling: action.state,};
+    case 'voted':
+      return {...state,voted:{...state.voted,[action.instrument]:true}};
+    case 'results':
+      return {...state,results:action.results}
+    default:
+      throw new Error();
+  }
+}
 
 
 
 function App() {
   const currentSocket = useRef(null);  
-  const [results,setResults] = useState({up:0,down:0})
-  const [isPolling,setIsPolling]  = useState(false);
-  const [voted,setVoted] = useState(false);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
 
   useEffect(()=>{
     initSocket();
-
   },[])
 
 
@@ -32,22 +52,31 @@ function App() {
 
 
     socket.on('results',(results)=>{
-      setResults(results);
+      dispatch({type:'results',results});      
     })
 
-    socket.on('togglePoll',(value)=>{
+    
+    
+
+    socket.on('togglePoll',(value)=>{      
+      console.log(value);
       if(value){
-        setIsPolling(true);
-        setVoted(false);
+        dispatch({type:'togglePoll',state:true})
       }else{
-        setIsPolling(false);
+        console.log('stopped vote');
+        
+        dispatch({type:'togglePoll',state:false})
       }
     });
+
     currentSocket.current = socket;
   }
 
+
+
+
   const sendVote=(value)=>{
-    setVoted(true);
+    dispatch({type:'voted',instrument:value.inst})
     currentSocket.current.emit('vote',value);
   }
 
@@ -57,20 +86,14 @@ function App() {
 
   return (
     <div className="App">
-      <h1 style={{position:'absolute',top:'10vh',left:'48vw'}}>{isPolling?'voting started!':'wait for a vote'}</h1>
-      <div>
+      <h1 >{state.isPolling?'voting started!':'wait for a vote'}</h1>
+      {/* <div style={{display:'grid',gap:4,gridTemplateColumns:'1fr 1fr 1fr 1fr 1fr'}}>
         {
-          Object.keys(results).map(type=><h1>{type}: {results[type]}</h1>)
+          Object.keys(results).map(type=><h3 key={type}>{type}: {results[type]}</h3>)
         }
-      </div>
-      <div>
-        <Button onClick={e=>sendVote('up')} disabled={isPolling&&!voted?false:true} variant="contained" color="primary">
-        UP
-        </Button>
-        <Button onClick={e=>sendVote('down')} disabled={isPolling&&!voted?false:true} variant="contained" color="primary">
-        DOWN
-        </Button>
-
+      </div> */}
+      <div style={{display:'flex'}}>
+        {instruments.map((name,index)=><Instrument sendVote={sendVote} key={index} isPolling={state.isPolling} voted={state.voted[name]} votes={state.results} id={index} name={name}   />)}
       </div>
     </div>
   );
