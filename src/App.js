@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 import Instrument from './components/Instrument';
 
 
-const socketURL = 'http://localhost:4000';
+const socketURL = '/';
 
 
 const instruments = ['zabumba','agogo','pandeiro','triangulo','ganza']
