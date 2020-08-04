@@ -5,19 +5,14 @@ import Button from '@material-ui/core/Button';
 
 
 
-export default function VoteButton({onClick,isPolling,num,votes,name,voted}){
-
-    // useEffect(()=>{
-    //     console.log('polling:'+isPolling+',voted:'+voted);
-        
-    // },[isPolling,voted])
+export default function VoteButton({onClick,isPolling,clipInfo,votes,name,voted}){    
 
     return(
     <div style={{display:'flex',flexDirection:'column',padding:'1ch'}}>
-        <Button onClick={e=>onClick(name,num)} disabled={isPolling&&!voted?false:true} variant="contained" color="primary">
-            {num}
+        <Button onClick={e=>onClick(name,clipInfo)} disabled={isPolling&&!voted?false:true} variant="contained" color="primary">
+            {clipInfo.pos+1}
         </Button>
-        <p>Votes:{votes[num]}</p>
+        {votes?<p>Votes:{votes[clipInfo.pos]}</p>:null}
     </div>
     )
 }

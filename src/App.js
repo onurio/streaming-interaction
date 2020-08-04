@@ -13,13 +13,15 @@ let resultsInitial = {}
 instruments.forEach(inst=>resultsInitial[inst] = 1)
 
 
-const initialState = {isPolling: false,voted:{},results:{...resultsInitial}};
+const initialState = {isPolling: false,voted:{},clips:{},results:{...resultsInitial}};
 
 
 function reducer(state, action) {
   switch (action.type) {
     case 'togglePoll':
       return {...state,voted:{},isPolling: action.state,};
+    case 'clips':
+      return {...state,clips:action.clips};
     case 'voted':
       return {...state,voted:{...state.voted,[action.instrument]:true}};
     case 'results':
@@ -55,7 +57,9 @@ function App() {
       dispatch({type:'results',results});      
     })
 
-    
+    socket.on('clips',(clips)=>{
+      dispatch({type:'clips',clips:clips});
+    })
     
 
     socket.on('togglePoll',(value)=>{      
@@ -76,7 +80,7 @@ function App() {
 
 
   const sendVote=(value)=>{
-    dispatch({type:'voted',instrument:value.inst})
+    dispatch({type:'voted',instrument:value.inst,clip:value.clip})
     currentSocket.current.emit('vote',value);
   }
 
@@ -93,7 +97,9 @@ function App() {
         }
       </div> */}
       <div style={{display:'flex'}}>
-        {instruments.map((name,index)=><Instrument sendVote={sendVote} key={index} isPolling={state.isPolling} voted={state.voted[name]} votes={state.results} id={index} name={name}   />)}
+        {Object.keys(state.clips).map((name,index)=>{
+          return <Instrument sendVote={sendVote} key={index} clips={state.clips[name]} isPolling={state.isPolling} voted={state.voted[name]} votes={state.results} id={index} name={name}   />
+        })}
       </div>
     </div>
   );

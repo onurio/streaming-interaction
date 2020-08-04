@@ -1,48 +1,64 @@
 const io = require('./index.js').io;
 
-const initial = {
-    zabumba:{
-            1: 0,
-            2: 0,
-            3: 0
-    },
-    agogo:{
-            1: 0,
-            2: 0,
-            3: 0
-    },
-    ganza:{
-            1: 0,
-            2: 0,
-            3: 0
-    },
-    pandeiro:{
-            1: 0,
-            2: 0,
-            3: 0
-    },
-    triangulo:{
-            1: 0,
-            2: 0,
-            3: 0
-    }
-};
+// const initial = {
+//     zabumba:{
+//             1: 0,
+//             2: 0,
+//             3: 0
+//     },
+//     agogo:{
+//             1: 0,
+//             2: 0,
+//             3: 0
+//     },
+//     ganza:{
+//             1: 0,
+//             2: 0,
+//             3: 0
+//     },
+//     pandeiro:{
+//             1: 0,
+//             2: 0,
+//             3: 0
+//     },
+//     triangulo:{
+//             1: 0,
+//             2: 0,
+//             3: 0
+//     }
+// };
 
-
-
-let polling = {...initial};
+let initial = {};
+let idRef = {};
+let polling = {};
 
 let currentNote = 36;
 
 module.exports = (socket) =>{
-
-    socket.on('vote',({inst,state})=>{        
-      polling = {...polling,[inst]:{...polling[inst],[state]:polling[inst][state]+1}};
+    console.log(socket.id+' connected');
+    socket.on('vote',({inst,clip})=>{
+      polling = {...polling,[inst]:{...polling[inst],[clip.pos]:polling[inst][clip.pos]+1}};
       io.emit('results',polling);
     })
 
 
     socket.on('adminJoined',()=>{
+
+
+        socket.on('clips',(clips)=>{
+            let polls = {};
+            idRef = {};
+            Object.keys(clips).forEach(track=>{
+                polls[track] = {};
+                idRef[track] = {};
+                clips[track].forEach(obj=>{
+                    polls[track][obj.pos] = 0;
+                    idRef[track][obj.pos] = obj.id;
+                });
+            })
+            initial = {...polls};
+            io.emit('clips',clips);
+        })
 
         socket.join('admin');
         console.log('admin joined');
@@ -66,15 +82,16 @@ module.exports = (socket) =>{
         // emit vote end to all clients
         let calculatedResults = {};
         Object.keys(polling).forEach((name,index)=>{
-            let max = {index:'1',val:polling[name]['1']};
+            let max = {index:0,val:0};
             Object.keys(polling[name]).forEach(samp=>{
                 if(polling[name][samp]>max.val){
                     max = {index:samp,val:polling[name][samp]}                    
                 }
             })
-            calculatedResults[index]= max.index;
+            calculatedResults[name]= max.index;
         });
-        io.to('admin').emit('finalResults',calculatedResults)
+        let final = Object.keys(calculatedResults).map(name=>idRef[name][calculatedResults[name]]);
+        io.to('admin').emit('finalResults',final);
         // io.emit('note',currentNote);
     }
     
