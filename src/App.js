@@ -1,31 +1,48 @@
 import React, { useReducer, useRef, useEffect } from 'react';
 import './App.css';
 import io from 'socket.io-client';
-import Instrument from './components/Instrument';
+import InstrumentCircle from './components/InstrumentCircle';
 
 
 const socketURL = '/';
 
 
-const instruments = ['zabumba','agogo','pandeiro','triangulo','ganza']
+const instruments = []
 
 let resultsInitial = {}
 instruments.forEach(inst=>resultsInitial[inst] = 1)
 
 
-const initialState = {isPolling: false,voted:{},clips:{},results:{...resultsInitial}};
+const initialState = {isPolling: false,voted:{},clips:{},results:{...resultsInitial},finalResults:{}};
 
 
 function reducer(state, action) {
   switch (action.type) {
     case 'togglePoll':
-      return {...state,voted:{},isPolling: action.state,};
+      let res= {}
+      if(!action.state){
+        res = {}
+        Object.keys(state.results).forEach(inst=>{
+          let max = {key:0,value:0};
+          Object.keys(state.results[inst]).forEach((clip,index)=>{
+            let current = Number(state.results[inst][clip]);
+            if(current>max.value){
+              max.value = current;
+              max.key = index;
+            }
+          })
+          res[inst]=Number(max.key);
+        })
+      }
+      return {...state,voted:{},finalResults:res,isPolling: action.state};
     case 'clips':
       return {...state,clips:action.clips};
     case 'voted':
       return {...state,voted:{...state.voted,[action.instrument]:true}};
     case 'results':
-      return {...state,results:action.results}
+      return {...state,results:action.results};
+    case 'final-results':
+      return {...state,finalResults:action.results};
     default:
       throw new Error();
   }
@@ -63,12 +80,9 @@ function App() {
     
 
     socket.on('togglePoll',(value)=>{      
-      console.log(value);
       if(value){
         dispatch({type:'togglePoll',state:true})
       }else{
-        console.log('stopped vote');
-        
         dispatch({type:'togglePoll',state:false})
       }
     });
@@ -91,15 +105,10 @@ function App() {
   return (
     <div className="App">
       <h1 >{state.isPolling?'voting started!':'wait for a vote'}</h1>
-      {/* <div style={{display:'grid',gap:4,gridTemplateColumns:'1fr 1fr 1fr 1fr 1fr'}}>
-        {
-          Object.keys(results).map(type=><h3 key={type}>{type}: {results[type]}</h3>)
-        }
-      </div> */}
-      <div style={{display:'flex'}}>
+      <div style={{display:'flex',justifyContent:'center',flexWrap:'wrap'}}>
         {Object.keys(state.clips).map((name,index)=>{
-          return <Instrument sendVote={sendVote} key={index} clips={state.clips[name]} isPolling={state.isPolling} voted={state.voted[name]} votes={state.results} id={index} name={name}   />
-        })}
+          return <InstrumentCircle sendVote={sendVote} key={index} clips={state.clips[name]} isPolling={state.isPolling} voted={state.voted[name]} finalResults={state.finalResults[name]} votes={state.results[name]} id={index} name={name}   />
+        })}        
       </div>
     </div>
   );

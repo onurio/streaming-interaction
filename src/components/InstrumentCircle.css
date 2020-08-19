@@ -1,0 +1,125 @@
+.instrument-container{
+    width: 25vw;
+    height: 25vw;
+    border-radius: 100%;
+    opacity: 0.5;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #0ac121;
+    position: relative;
+    margin: 50px;
+}
+
+.instrument-container h1{
+    position: absolute;
+    width: 50%;
+    z-index: 30;
+}
+
+.instrument-container.polling{
+    opacity: 1;
+    pointer-events: all;
+
+}
+
+.instrument-knob{
+    width: 60%;
+    height: 60%;
+    z-index: 20;
+    background-color: yellow;
+    box-shadow: 0px 0px 20px 6px #00000061;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.instrument-knob-arrow{
+    border-bottom: 25px solid yellow;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    margin-top: -20px;
+}
+
+
+#list{
+	background-color: #0ac121;
+	height: 25vw;
+	width: 25vw;
+	border-radius: 50%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.list-item{
+	list-style: none;
+    background-color: black;
+    width: 2em;
+    height: 2em;
+    border-radius: 100%;
+    top: calc(50% - 1em);
+    left: calc(50% - 1em);
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.05s;
+}
+
+.clip-vote-circle{
+	list-style: none;
+    background-color: rgb(49,89,234);
+    border-radius: 100%;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.05s;
+}
+
+.clip-vote-circle.chosen{
+    background-color: rgb(49,89,234);
+    border: 2px dashed black;
+}
+
+
+
+.clip-circle{
+    width: 50%;
+    height: 50%;
+    border: unset;
+    border-radius: 100%;
+    background-color: white;
+    opacity: 0;
+    pointer-events: none;
+    cursor: pointer;
+}
+
+.clip-circle.chosen{
+    opacity: 1;
+}
+
+
+
+.list-item:hover{
+    width: 2.5em;
+    height: 2.5em;
+    top: calc(50% - 1.25em);
+    left: calc(50% - 1.25em);
+    cursor: pointer;
+}
+
+
+@media screen and (max-width: 768px){
+    .instrument-container{
+        margin: 20px;
+    }
+
+    .instrument-container h1{
+        font-size: 20px;
+    }
+}

@@ -1,38 +1,9 @@
 const io = require('./index.js').io;
 
-// const initial = {
-//     zabumba:{
-//             1: 0,
-//             2: 0,
-//             3: 0
-//     },
-//     agogo:{
-//             1: 0,
-//             2: 0,
-//             3: 0
-//     },
-//     ganza:{
-//             1: 0,
-//             2: 0,
-//             3: 0
-//     },
-//     pandeiro:{
-//             1: 0,
-//             2: 0,
-//             3: 0
-//     },
-//     triangulo:{
-//             1: 0,
-//             2: 0,
-//             3: 0
-//     }
-// };
 
 let initial = {};
 let idRef = {};
 let polling = {};
-
-let currentNote = 36;
 
 module.exports = (socket) =>{
     console.log(socket.id+' connected');
